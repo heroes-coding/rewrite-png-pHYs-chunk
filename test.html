@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+</head>
+
+<body>
+    <script src="index.js"></script>
+    <script>
+        var canvas = document.createElement('canvas');
+
+        canvas.width = 400;
+        canvas.height = 400;
+
+
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+        ctx.fillRect(100, 100, 200, 200);
+        ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
+        ctx.fillRect(150, 150, 200, 200);
+        ctx.fillStyle = "rgba(0, 0, 255, 0.2)";
+        ctx.fillRect(200, 50, 200, 200);
+
+        var pngHeader = "data:image/png;base64,";
+        var base64 = canvas.toDataURL().substr(pngHeader.length);
+        console.log("base64 = " + base64);
+
+
+
+
+        // uncomment this to test with base64 string
+        //var base64 = "iVBORw0KGgoAAAANSUhEUgAAAHEAAABpCAYAAAAN+8wmAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAHYcAAB2HAY/l8WUAAANfSURBVHhe7Z0xbiJBEEU5EgE5h+EEnIAzkJETraV1SEREQEBCygE4ACkimN1aTa9Q++Ppnumpahf/ST/wGIvuevA9YJmZNOTHQ4kOoEQHUKIDKNEBlOgASnQAJTqAEh1AiQ6gRAdQogMo0QGU6ABKdAAlOoASHUCJDjCXeDqdmvP53H5VB8fjsTkcDlmx3IOpxPl83kwmk3+ZTqfN5XJpv2PD7Xb7v54+kf1YYCZxv9/DQSyXy+Z+v7e30mW1WsE15UT2pY2ZxN+fn3AIIb8+Ptpb6iEPILSWnMi+tKlWomQ2m6lWrNwXWkdOKPFFNCv2er02m82mWa/XnVksFl/WSokdsajY70B7eHuJ6JEdR7tiv0MeVPH63l5iGEDKCYblWWyAEoHE57qUZ5s86+LbxLGsWErskBhAg4pjVbGUmChRkNpMrdjH49H+1PhQYobEQG0VS4k9JAbQ8OJoVCwlDpAo5FTsWGexlDhQYsCyYimxkMQAGmic0hVLiYUlCtoVS4kjSAxoVSwljigxgIYcZ0jFUqKCRGHMiqVEJYmBMSqWEpUlBtDg46RWLCUaSRRKVSwlGkoMDK1YSqxAYgDJiIMqlhIrkij0qVhKrExiILViZf1oD5RYgcQAepal5K0k7na7LwOoSaKQWrHPkX1p8/d+8WIsUpvEQGrFGgYeNEmtEgN9K1Yh8KBJttttO656GfrvbyMFHjQJn4m9Aw+ahL8Te6Zdpzo8Oy0HXye+oG918sV+BRL5jk0GtUnke6c9qEliSnXyrxiAGiSmVuerdVGiocQ+1YmgRCOJaPBxUHUiKFFZ4tDqRFCiksRS1YmgRAWJaMhxUqsTQYkjShyjOhGUOILEMasTQYmFJaKBxhlSnQhKLCRRqzoRlDhQonZ1IihxgEQ0vDilqxNBiT0kWlYnghIzJOZUJz9RSpFUiWhQcTSqE0GJHRJrq04EJQKJYQDWZ52pUCKQyE8e7kdVErtiWZ0ItAdKfBHN6uSn8WeQIlG7OuW+0DpyQolPsajOlBOqrryVRF4rqhxmEgVeta0MphIFuX6ipCZ4/USiDiU6gBIdQIkOoEQHUKIDKNEBlOgASnQAJTqAEh1AiQ6gRAdQogMo0QGU6ABKdAAlOoASHUCJDqBEB1Dij6dp/gAS8mrjXShmXwAAAABJRU5ErkJggg==";
+        var img = new Image();
+
+        // encode PNG as Uint8Array
+        var binary_string = window.atob(base64);
+        var len = binary_string.length;
+        var bytes = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+        }
+
+        // mess with pHYs chunk here
+
+        // dots per inch
+        var dpi = 150;
+        // pixels per metre
+        var ppm = Math.round(dpi / 2.54 * 100);
+        console.log("bytes.length = " + bytes.length)
+        bytes = rewrite_pHYs_chunk(bytes, ppm, ppm);
+        console.log("bytes.length = " + bytes.length);
+        // run through again to check CRC :)
+        bytes = rewrite_pHYs_chunk(bytes, ppm, ppm);
+        console.log("bytes.length = " + bytes.length)
+
+
+        // re-encode PNG (btoa method)
+        var b64encoded = btoa(String.fromCharCode.apply(null, bytes));
+        console.log(pngHeader + b64encoded);
+        img.src = pngHeader + b64encoded;
+
+        // re-enocde PNG blob method
+        // works for display
+        // but not if you want the base64 string for export
+        //var blob = new Blob([bytes], {'type': 'image/png'});
+        //var URL = URL.createObjectURL(blob); //possibly `webkitURL` or another vendor prefix for old browsers.
+        //img.src = URL;
+        //console.log(URL);
+
+
+        // draw it
+        document.body.appendChild(img);
+    </script>
+
+
+
+</body>
+
+</html>
